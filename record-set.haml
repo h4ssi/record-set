@@ -1,4 +1,10 @@
 !!! 5
-%html
-  %body
-    test
+
+%link(rel="import" href="../polymer/polymer.html")
+
+%polymer-element(name="record-set" attributes="records")
+  %template
+  :coffeescript
+    Polymer 'record-set',
+      created: () ->
+        @records = []

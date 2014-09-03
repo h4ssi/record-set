@@ -5,6 +5,7 @@ module.exports = (grunt) ->
             dist:
                 files:
                     'record-set.html': 'record-set.haml'
+                    'demo.html': 'demo.haml'
                 options:
                     bundleExec: true
     grunt.loadNpmTasks 'grunt-contrib-haml'

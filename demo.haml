@@ -1,0 +1,20 @@
+!!! 5
+%html
+  %head
+    %title "record-set demo"
+    %script(src="../platform/platform.js")
+    %link(rel="import" href="../polymer/polymer.html")
+    %link(rel="import" href="record-set.html")
+  %body
+    %polymer-element(name="demo-app")
+      %template
+        %record-set(id="data" records="{{records}}")
+
+        %ul
+          %template(repeat="{{record in records}}")
+            %li {{record.label}}
+      :coffeescript
+        Polymer 'demo-app',
+          created: () ->
+            @records = [{label: "test"}]
+    %demo-app

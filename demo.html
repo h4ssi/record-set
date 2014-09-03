@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>"record-set demo"</title>
+    <script src='../platform/platform.js'></script>
+    <link href='../polymer/polymer.html' rel='import'>
+    <link href='record-set.html' rel='import'>
+  </head>
+  <body>
+    <polymer-element name='demo-app'>
+      <template>
+        <record-set id='data' records='{{records}}'></record-set>
+        <ul>
+          <template repeat='{{record in records}}'>
+            <li>{{record.label}}</li>
+          </template>
+        </ul>
+      </template>
+      <script>
+        (function() {
+          Polymer('demo-app', {
+            created: function() {
+              return this.records = [
+                {
+                  label: "test"
+                }
+              ];
+            }
+          });
+        
+        }).call(this);
+      </script>
+    </polymer-element>
+    <demo-app></demo-app>
+  </body>
+</html>

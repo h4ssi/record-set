@@ -1,6 +1,15 @@
 <!DOCTYPE html>
-<html>
-  <body>
-    test
-  </body>
-</html>
+<link href='../polymer/polymer.html' rel='import'>
+<polymer-element attributes='records' name='record-set'>
+  <template></template>
+  <script>
+    (function() {
+      Polymer('record-set', {
+        created: function() {
+          return this.records = [];
+        }
+      });
+    
+    }).call(this);
+  </script>
+</polymer-element>
