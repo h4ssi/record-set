@@ -18,11 +18,17 @@
         @_data[type].next++
         @records.push record
 
-%polymer-element(name="record-single" attributes="type")
+%polymer-element(name="record-base" attributes="rid")
   %template
     %record-set(id="set")
   :coffeescript
     Polymer
+      rid: undefined,
+      created: () ->
+        @type = @tagName.toLowerCase()
+      ready: () ->
+        @save() if @rid?
+
       save: () ->
         console.log this
         @$.set.save @type, this

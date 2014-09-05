@@ -7,23 +7,21 @@
     <link href='record-set.html' rel='import'>
   </head>
   <body>
+    <polymer-element attributes='label' extends='record-base' name='my-record' noscript></polymer-element>
     <polymer-element name='demo-app'>
       <template>
         <record-set id='data' records='{{records}}'></record-set>
-        <record-single id='x' label='test' type='test'></record-single>
+        <my-record id='x' label='test' rid='1'></my-record>
+        <my-record id='y' label='test2' rid='2'></my-record>
         <ul>
           <template repeat='{{record in $.data.records}}'>
-            <li>{{record.type}} {{record.label}}</li>
+            <li>{{record.type}}: {{record.rid}} -> {{record.label}}</li>
           </template>
         </ul>
       </template>
       <script>
         (function() {
-          Polymer({
-            ready: function() {
-              return this.$.x.save();
-            }
-          });
+          Polymer('demo-app');
         
         }).call(this);
       </script>

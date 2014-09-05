@@ -29,13 +29,22 @@
     }).call(this);
   </script>
 </polymer-element>
-<polymer-element attributes='type' name='record-single'>
+<polymer-element attributes='rid' name='record-base'>
   <template>
     <record-set id='set'></record-set>
   </template>
   <script>
     (function() {
       Polymer({
+        rid: void 0,
+        created: function() {
+          return this.type = this.tagName.toLowerCase();
+        },
+        ready: function() {
+          if (this.rid != null) {
+            return this.save();
+          }
+        },
         save: function() {
           console.log(this);
           return this.$.set.save(this.type, this);
