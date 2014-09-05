@@ -4,9 +4,41 @@
   <template></template>
   <script>
     (function() {
-      Polymer('record-set', {
-        created: function() {
-          return this.records = [];
+      var data;
+    
+      data = {};
+    
+      Polymer({
+        records: [],
+        ready: function() {
+          return this._data = data;
+        },
+        save: function(type, record) {
+          if (this._data[type] == null) {
+            this._data[type] = {
+              records: {},
+              next: 1
+            };
+          }
+          this._data[type].records[this._data[type].next] = record;
+          this._data[type].next++;
+          return this.records.push(record);
+        }
+      });
+    
+    }).call(this);
+  </script>
+</polymer-element>
+<polymer-element attributes='type' name='record-single'>
+  <template>
+    <record-set id='set'></record-set>
+  </template>
+  <script>
+    (function() {
+      Polymer({
+        save: function() {
+          console.log(this);
+          return this.$.set.save(this.type, this);
         }
       });
     

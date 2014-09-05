@@ -5,6 +5,24 @@
 %polymer-element(name="record-set" attributes="records")
   %template
   :coffeescript
-    Polymer 'record-set',
-      created: () ->
-        @records = []
+    data = {}
+    Polymer
+      records: []
+      #computed:
+      #  records: 'data.test.records' # just for now :]
+      ready: () ->
+        @_data = data
+      save: (type, record) ->
+        @_data[type] = { records: {}, next: 1 } unless @_data[type]?
+        @_data[type].records[@_data[type].next] = record
+        @_data[type].next++
+        @records.push record
+
+%polymer-element(name="record-single" attributes="type")
+  %template
+    %record-set(id="set")
+  :coffeescript
+    Polymer
+      save: () ->
+        console.log this
+        @$.set.save @type, this

@@ -10,11 +10,13 @@
       %template
         %record-set(id="data" records="{{records}}")
 
+        %record-single(id="x" type="test" label="test")
+
         %ul
-          %template(repeat="{{record in records}}")
-            %li {{record.label}}
+          %template(repeat="{{record in $.data.records}}")
+            %li {{record.type}} {{record.label}}
       :coffeescript
-        Polymer 'demo-app',
-          created: () ->
-            @records = [{label: "test"}]
+        Polymer
+          ready: () ->
+            @$.x.save()
     %demo-app

@@ -10,21 +10,18 @@
     <polymer-element name='demo-app'>
       <template>
         <record-set id='data' records='{{records}}'></record-set>
+        <record-single id='x' label='test' type='test'></record-single>
         <ul>
-          <template repeat='{{record in records}}'>
-            <li>{{record.label}}</li>
+          <template repeat='{{record in $.data.records}}'>
+            <li>{{record.type}} {{record.label}}</li>
           </template>
         </ul>
       </template>
       <script>
         (function() {
-          Polymer('demo-app', {
-            created: function() {
-              return this.records = [
-                {
-                  label: "test"
-                }
-              ];
+          Polymer({
+            ready: function() {
+              return this.$.x.save();
             }
           });
         
