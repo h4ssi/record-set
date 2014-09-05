@@ -14,7 +14,7 @@
         <my-record id='x' label='test' rid='1'></my-record>
         <my-record id='y' label='test2' rid='2'></my-record>
         <ul>
-          <template repeat='{{record in $.data.records}}'>
+          <template repeat='{{record in $.x.all}}'>
             <li>{{record.type}}: {{record.rid}} -> {{record.label}}</li>
           </template>
         </ul>

@@ -9,7 +9,10 @@
       data = {};
     
       Polymer({
-        records: [],
+        _data: void 0,
+        computed: {
+          all: '_extractRecords(_data)'
+        },
         ready: function() {
           return this._data = data;
         },
@@ -21,8 +24,26 @@
             };
           }
           this._data[type].records[this._data[type].next] = record;
-          this._data[type].next++;
-          return this.records.push(record);
+          return this._data[type].next++;
+        },
+        _extractRecords: function(data) {
+          return new function() {
+            var id, record, type, value;
+            for (type in data) {
+              value = data[type];
+              this[type] = (function() {
+                var _ref, _results;
+                _ref = value.records;
+                _results = [];
+                for (id in _ref) {
+                  record = _ref[id];
+                  _results.push(record);
+                }
+                return _results;
+              })();
+            }
+            return this;
+          };
         }
       });
     
@@ -37,8 +58,9 @@
     (function() {
       Polymer({
         rid: void 0,
-        created: function() {
-          return this.type = this.tagName.toLowerCase();
+        computed: {
+          type: '_lc(tagName)',
+          all: '$.set.all[type]'
         },
         ready: function() {
           if (this.rid != null) {
@@ -46,8 +68,11 @@
           }
         },
         save: function() {
-          console.log(this);
+          console.log("test");
           return this.$.set.save(this.type, this);
+        },
+        _lc: function(s) {
+          return s.toLowerCase();
         }
       });
     

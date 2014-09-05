@@ -7,16 +7,19 @@
   :coffeescript
     data = {}
     Polymer
-      records: []
-      #computed:
-      #  records: 'data.test.records' # just for now :]
+      _data: undefined
+      computed:
+        all: '_extractRecords(_data)'
       ready: () ->
         @_data = data
       save: (type, record) ->
         @_data[type] = { records: {}, next: 1 } unless @_data[type]?
         @_data[type].records[@_data[type].next] = record
         @_data[type].next++
-        @records.push record
+      _extractRecords: (data) ->
+        new ->
+          @[type] = (record for id,record of value.records) for type,value of data
+          @
 
 %polymer-element(name="record-base" attributes="rid")
   %template
@@ -24,11 +27,12 @@
   :coffeescript
     Polymer
       rid: undefined,
-      created: () ->
-        @type = @tagName.toLowerCase()
+      computed:
+        type: '_lc(tagName)'
+        all: '$.set.all[type]'
       ready: () ->
         @save() if @rid?
-
       save: () ->
-        console.log this
+        console.log "test"
         @$.set.save @type, this
+      _lc: (s) -> s.toLowerCase()

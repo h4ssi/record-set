@@ -15,10 +15,11 @@
         %my-record(id="y" rid="2" label="test2")
 
         %ul
-          %template(repeat="{{record in $.data.records}}")
+          %template(repeat="{{record in $.x.all}}")
             %li {{record.type}}: {{record.rid}} -> {{record.label}}
+
       :coffeescript
         Polymer 'demo-app'
-          #ready: () ->
+          #ready: () -> 
           #  @$.x.save()
     %demo-app
