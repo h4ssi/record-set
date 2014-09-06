@@ -7,21 +7,30 @@
     <link href='record-set.html' rel='import'>
   </head>
   <body>
-    <polymer-element attributes='label' extends='record-base' name='my-record' noscript></polymer-element>
+    <polymer-element attributes='label' extends='record-base' name='my-record' noscript type='test'></polymer-element>
+    <polymer-element extends='my-record' name='my-record-view' noscript>
+      <template>
+        <li>{{type}}: {{rid}} -> {{label}}</li>
+      </template>
+    </polymer-element>
     <polymer-element name='demo-app'>
       <template>
         <record-set id='data' records='{{records}}'></record-set>
-        <my-record id='x' label='test' rid='1'></my-record>
-        <my-record id='y' label='test2' rid='2'></my-record>
+        <my-record id='x' label='test' persist rid='1'></my-record>
+        <my-record id='y' label='test2' persist rid='2'></my-record>
         <ul>
-          <template repeat='{{record in $.x.all}}'>
-            <li>{{record.type}}: {{record.rid}} -> {{record.label}}</li>
+          <template repeat='{{$.x.all}}'>
+            <my-record-view rid='{{}}'></my-record-view>
           </template>
         </ul>
       </template>
       <script>
         (function() {
-          Polymer('demo-app');
+          Polymer('demo-app', {
+            ready: function() {
+              return console.log("ready");
+            }
+          });
         
         }).call(this);
       </script>

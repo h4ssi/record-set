@@ -14,25 +14,39 @@
         @_data = data
       save: (type, record) ->
         @_data[type] = { records: {}, next: 1 } unless @_data[type]?
-        @_data[type].records[@_data[type].next] = record
-        @_data[type].next++
+        r = @_data[type].records[record.rid]
+        r = {} unless r?
+        r.rid = @_data[type].next++ unless r.rid?
+        @_data[type].records[r.rid] = r
+        for k,v of record.publish
+          r[k] = record[k] unless k == "rid" or k == "persist" or k == "type" # TODO care if key changes
+      load: (type, record) ->
+        if @_data[type]? and @_data[type].records[record.rid]?
+          for k,v of @_data[type].records[record.rid]
+            record[k] = v unless k == "rid"
       _extractRecords: (data) ->
         new ->
-          @[type] = (record for id,record of value.records) for type,value of data
+          @[type] = (record.rid for id,record of value.records) for type,value of data
           @
 
-%polymer-element(name="record-base" attributes="rid")
+%polymer-element(name="record-base" attributes="rid persist type")
   %template
     %record-set(id="set")
   :coffeescript
     Polymer
       rid: undefined,
+      observe: {
+        '$.set.data': 'load' # TODO: overkill ! use fine grained events
+      }
       computed:
-        type: '_lc(tagName)'
+        #type: '_lc(tagName)' # todo auto detection of type name
         all: '$.set.all[type]'
       ready: () ->
-        @save() if @rid?
+        @save() if @persist?
+        @load() if @rid?
       save: () ->
-        console.log "test"
-        @$.set.save @type, this
+        @$.set.save @type, @ 
+      load: () ->
+        @$.set.load @type, @
       _lc: (s) -> s.toLowerCase()
+

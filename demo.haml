@@ -6,20 +6,23 @@
     %link(rel="import" href="../polymer/polymer.html")
     %link(rel="import" href="record-set.html")
   %body
-    %polymer-element(name="my-record" extends="record-base" attributes="label" noscript)
+    %polymer-element(name="my-record" extends="record-base" type="test" attributes="label" noscript)
+    %polymer-element(name="my-record-view" extends="my-record" noscript)
+      %template
+        %li {{type}}: {{rid}} -> {{label}}
     %polymer-element(name="demo-app")
       %template
         %record-set(id="data" records="{{records}}")
 
-        %my-record(id="x" rid="1" label="test")
-        %my-record(id="y" rid="2" label="test2")
+        %my-record(id="x" persist rid="1" label="test")
+        %my-record(id="y" persist rid="2" label="test2")
 
         %ul
-          %template(repeat="{{record in $.x.all}}")
-            %li {{record.type}}: {{record.rid}} -> {{record.label}}
+          %template(repeat="{{$.x.all}}")
+            %my-record-view(rid="{{}}")
 
       :coffeescript
-        Polymer 'demo-app'
-          #ready: () -> 
-          #  @$.x.save()
+        Polymer 'demo-app',
+          ready: () -> 
+            console.log "ready"
     %demo-app

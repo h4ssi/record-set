@@ -17,14 +17,48 @@
           return this._data = data;
         },
         save: function(type, record) {
+          var k, r, v, _ref, _results;
           if (this._data[type] == null) {
             this._data[type] = {
               records: {},
               next: 1
             };
           }
-          this._data[type].records[this._data[type].next] = record;
-          return this._data[type].next++;
+          r = this._data[type].records[record.rid];
+          if (r == null) {
+            r = {};
+          }
+          if (r.rid == null) {
+            r.rid = this._data[type].next++;
+          }
+          this._data[type].records[r.rid] = r;
+          _ref = record.publish;
+          _results = [];
+          for (k in _ref) {
+            v = _ref[k];
+            if (!(k === "rid" || k === "persist" || k === "type")) {
+              _results.push(r[k] = record[k]);
+            } else {
+              _results.push(void 0);
+            }
+          }
+          return _results;
+        },
+        load: function(type, record) {
+          var k, v, _ref, _results;
+          if ((this._data[type] != null) && (this._data[type].records[record.rid] != null)) {
+            _ref = this._data[type].records[record.rid];
+            _results = [];
+            for (k in _ref) {
+              v = _ref[k];
+              if (k !== "rid") {
+                _results.push(record[k] = v);
+              } else {
+                _results.push(void 0);
+              }
+            }
+            return _results;
+          }
         },
         _extractRecords: function(data) {
           return new function() {
@@ -37,7 +71,7 @@
                 _results = [];
                 for (id in _ref) {
                   record = _ref[id];
-                  _results.push(record);
+                  _results.push(record.rid);
                 }
                 return _results;
               })();
@@ -50,7 +84,7 @@
     }).call(this);
   </script>
 </polymer-element>
-<polymer-element attributes='rid' name='record-base'>
+<polymer-element attributes='rid persist type' name='record-base'>
   <template>
     <record-set id='set'></record-set>
   </template>
@@ -58,18 +92,25 @@
     (function() {
       Polymer({
         rid: void 0,
+        observe: {
+          '$.set.data': 'load'
+        },
         computed: {
-          type: '_lc(tagName)',
           all: '$.set.all[type]'
         },
         ready: function() {
+          if (this.persist != null) {
+            this.save();
+          }
           if (this.rid != null) {
-            return this.save();
+            return this.load();
           }
         },
         save: function() {
-          console.log("test");
           return this.$.set.save(this.type, this);
+        },
+        load: function() {
+          return this.$.set.load(this.type, this);
         },
         _lc: function(s) {
           return s.toLowerCase();
