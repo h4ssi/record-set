@@ -4,9 +4,37 @@
   <template></template>
   <script>
     (function() {
-      var data;
+      var data, fields, getFields,
+        __hasProp = {}.hasOwnProperty;
     
       data = {};
+    
+      fields = {};
+    
+      getFields = function(record) {
+        var k, p, v, _ref, _results;
+        if (fields[record.tagName] != null) {
+          return fields[record.tagName];
+        }
+        p = HTMLElement.getPrototypeForTag(record.tagName);
+        while (true) {
+          if (p.element["extends"] == null) {
+            throw "not a record: " + record.tagName;
+          }
+          if (p.element["extends"] === "record-base") {
+            break;
+          }
+          p = HTMLElement.getPrototypeForTag(p.element["extends"]);
+        }
+        _ref = p.publish;
+        _results = [];
+        for (k in _ref) {
+          if (!__hasProp.call(_ref, k)) continue;
+          v = _ref[k];
+          _results.push(k);
+        }
+        return _results;
+      };
     
       Polymer({
         _data: void 0,
@@ -17,7 +45,7 @@
           return this._data = data;
         },
         save: function(type, record) {
-          var k, r, v, _ref, _results;
+          var k, r, _i, _len, _ref, _results;
           if (this._data[type] == null) {
             this._data[type] = {
               records: {},
@@ -32,15 +60,11 @@
             r.rid = this._data[type].next++;
           }
           this._data[type].records[r.rid] = r;
-          _ref = record.publish;
+          _ref = getFields(record);
           _results = [];
-          for (k in _ref) {
-            v = _ref[k];
-            if (!(k === "rid" || k === "persist" || k === "type")) {
-              _results.push(r[k] = record[k]);
-            } else {
-              _results.push(void 0);
-            }
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            k = _ref[_i];
+            _results.push(r[k] = record[k]);
           }
           return _results;
         },

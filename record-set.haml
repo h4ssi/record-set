@@ -6,6 +6,18 @@
   %template
   :coffeescript
     data = {}
+    fields = {}
+    
+    getFields = (record) -> 
+      return fields[record.tagName] if fields[record.tagName]?
+
+      p = HTMLElement.getPrototypeForTag record.tagName
+      loop
+        throw "not a record: " + record.tagName unless p.element.extends?
+        break if p.element.extends == "record-base"
+        p = HTMLElement.getPrototypeForTag p.element.extends
+      k for own k,v of p.publish # rid is excluded
+    
     Polymer
       _data: undefined
       computed:
@@ -18,8 +30,8 @@
         r = {} unless r?
         r.rid = @_data[type].next++ unless r.rid?
         @_data[type].records[r.rid] = r
-        for k,v of record.publish
-          r[k] = record[k] unless k == "rid" or k == "persist" or k == "type" # TODO care if key changes
+        for k in getFields record
+          r[k] = record[k]
       load: (type, record) ->
         if @_data[type]? and @_data[type].records[record.rid]?
           for k,v of @_data[type].records[record.rid]
