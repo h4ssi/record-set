@@ -7,9 +7,17 @@
     %link(rel="import" href="record-set.html")
   %body
     %polymer-element(name="my-record" extends="record-base" type="test" attributes="label" noscript)
-    %polymer-element(name="my-record-view" extends="my-record" noscript)
+    %polymer-element(name="my-record-view" extends="my-record")
       %template
-        %li {{type}}: {{rid}} -> {{label}}
+        %li 
+          {{type}}: {{rid}} -> {{label}}
+          %a(href="javascript:void(0)" id="a") Delete
+      :coffeescript
+        Polymer 'my-record-view',
+          ready: () ->
+            @$.a.addEventListener "click", () =>
+              @delete()
+              false
     %polymer-element(name="demo-app")
       %template
         %record-set(id="data")
@@ -18,7 +26,7 @@
         %my-record(id="y" persist rid="2" label="test2")
 
         %ul
-          %template(repeat="{{$.x.all}}")
+          %template(repeat="{{$.y.all}}")
             %my-record-view(rid="{{}}")
 
       :coffeescript

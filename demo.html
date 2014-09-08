@@ -8,10 +8,28 @@
   </head>
   <body>
     <polymer-element attributes='label' extends='record-base' name='my-record' noscript type='test'></polymer-element>
-    <polymer-element extends='my-record' name='my-record-view' noscript>
+    <polymer-element extends='my-record' name='my-record-view'>
       <template>
-        <li>{{type}}: {{rid}} -> {{label}}</li>
+        <li>
+          {{type}}: {{rid}} -> {{label}}
+          <a href='javascript:void(0)' id='a'>Delete</a>
+        </li>
       </template>
+      <script>
+        (function() {
+          Polymer('my-record-view', {
+            ready: function() {
+              return this.$.a.addEventListener("click", (function(_this) {
+                return function() {
+                  _this["delete"]();
+                  return false;
+                };
+              })(this));
+            }
+          });
+        
+        }).call(this);
+      </script>
     </polymer-element>
     <polymer-element name='demo-app'>
       <template>
@@ -19,7 +37,7 @@
         <my-record id='x' label='test' persist rid='1'></my-record>
         <my-record id='y' label='test2' persist rid='2'></my-record>
         <ul>
-          <template repeat='{{$.x.all}}'>
+          <template repeat='{{$.y.all}}'>
             <my-record-view rid='{{}}'></my-record-view>
           </template>
         </ul>

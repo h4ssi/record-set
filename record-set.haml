@@ -6,6 +6,7 @@
   %template
   :coffeescript
     data = {}
+    dummy = {data: 0}
     fields = {}
     
     getFields = (record) -> 
@@ -20,10 +21,12 @@
     
     Polymer
       _data: undefined
+      _dummy: undefined
       computed:
-        all: '_extractRecords(_data)'
-      ready: () ->
+        all: '_extractRecords(_data, _dummy.data)' # TODO dummy was added so changes within _data are observed
+      created: () ->
         @_data = data
+        @_dummy = dummy
       save: (record) ->
         @_data[record.type] = { records: {}, next: 1 } unless @_data[record.type]?
         r = @_data[record.type].records[record.rid]
@@ -32,10 +35,16 @@
         @_data[record.type].records[r.rid] = r
         for k in getFields record
           r[k] = record[k]
+        @_dummy.data++
       load: (record) ->
         if @_data[record.type]? and @_data[record.type].records[record.rid]?
           for k,v of @_data[record.type].records[record.rid]
-            record[k] = v unless k == "rid"
+            record[k]= v unless k == "rid"
+          @_dummy.data++
+      delete: (record) ->
+        if @_data[record.type]? and @_data[record.type].records[record.rid]?
+          delete @_data[record.type].records[record.rid]
+          @_dummy.data++
       _extractRecords: (data) ->
         new ->
           @[type] = (record.rid for id,record of value.records) for type,value of data
@@ -60,5 +69,7 @@
         @$.set.save @ 
       load: () ->
         @$.set.load @
+      delete: () ->
+        @$.set.delete @
       _lc: (s) -> s.toLowerCase()
 

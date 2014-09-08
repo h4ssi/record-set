@@ -4,10 +4,14 @@
   <template></template>
   <script>
     (function() {
-      var data, fields, getFields,
+      var data, dummy, fields, getFields,
         __hasProp = {}.hasOwnProperty;
     
       data = {};
+    
+      dummy = {
+        data: 0
+      };
     
       fields = {};
     
@@ -38,14 +42,16 @@
     
       Polymer({
         _data: void 0,
+        _dummy: void 0,
         computed: {
-          all: '_extractRecords(_data)'
+          all: '_extractRecords(_data, _dummy.data)'
         },
-        ready: function() {
-          return this._data = data;
+        created: function() {
+          this._data = data;
+          return this._dummy = dummy;
         },
         save: function(record) {
-          var k, r, _i, _len, _ref, _results;
+          var k, r, _i, _len, _ref;
           if (this._data[record.type] == null) {
             this._data[record.type] = {
               records: {},
@@ -61,27 +67,29 @@
           }
           this._data[record.type].records[r.rid] = r;
           _ref = getFields(record);
-          _results = [];
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             k = _ref[_i];
-            _results.push(r[k] = record[k]);
+            r[k] = record[k];
           }
-          return _results;
+          return this._dummy.data++;
         },
         load: function(record) {
-          var k, v, _ref, _results;
+          var k, v, _ref;
           if ((this._data[record.type] != null) && (this._data[record.type].records[record.rid] != null)) {
             _ref = this._data[record.type].records[record.rid];
-            _results = [];
             for (k in _ref) {
               v = _ref[k];
               if (k !== "rid") {
-                _results.push(record[k] = v);
-              } else {
-                _results.push(void 0);
+                record[k] = v;
               }
             }
-            return _results;
+            return this._dummy.data++;
+          }
+        },
+        "delete": function(record) {
+          if ((this._data[record.type] != null) && (this._data[record.type].records[record.rid] != null)) {
+            delete this._data[record.type].records[record.rid];
+            return this._dummy.data++;
           }
         },
         _extractRecords: function(data) {
@@ -135,6 +143,9 @@
         },
         load: function() {
           return this.$.set.load(this);
+        },
+        "delete": function() {
+          return this.$.set["delete"](this);
         },
         _lc: function(s) {
           return s.toLowerCase();
