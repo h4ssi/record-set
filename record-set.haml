@@ -2,7 +2,7 @@
 
 %link(rel="import" href="../polymer/polymer.html")
 
-%polymer-element(name="record-set" attributes="records")
+%polymer-element(name="record-set")
   %template
   :coffeescript
     data = {}
@@ -24,17 +24,17 @@
         all: '_extractRecords(_data)'
       ready: () ->
         @_data = data
-      save: (type, record) ->
-        @_data[type] = { records: {}, next: 1 } unless @_data[type]?
-        r = @_data[type].records[record.rid]
+      save: (record) ->
+        @_data[record.type] = { records: {}, next: 1 } unless @_data[record.type]?
+        r = @_data[record.type].records[record.rid]
         r = {} unless r?
-        r.rid = @_data[type].next++ unless r.rid?
-        @_data[type].records[r.rid] = r
+        r.rid = @_data[record.type].next++ unless r.rid?
+        @_data[record.type].records[r.rid] = r
         for k in getFields record
           r[k] = record[k]
-      load: (type, record) ->
-        if @_data[type]? and @_data[type].records[record.rid]?
-          for k,v of @_data[type].records[record.rid]
+      load: (record) ->
+        if @_data[record.type]? and @_data[record.type].records[record.rid]?
+          for k,v of @_data[record.type].records[record.rid]
             record[k] = v unless k == "rid"
       _extractRecords: (data) ->
         new ->
@@ -48,7 +48,7 @@
     Polymer
       rid: undefined,
       observe: {
-        '$.set.data': 'load' # TODO: overkill ! use fine grained events
+        '$.set._data': 'load' # TODO: overkill ! use fine grained events
       }
       computed:
         #type: '_lc(tagName)' # todo auto detection of type name
@@ -57,8 +57,8 @@
         @save() if @persist?
         @load() if @rid?
       save: () ->
-        @$.set.save @type, @ 
+        @$.set.save @ 
       load: () ->
-        @$.set.load @type, @
+        @$.set.load @
       _lc: (s) -> s.toLowerCase()
 
