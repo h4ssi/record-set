@@ -74,16 +74,19 @@
           return this._dummy.data++;
         },
         load: function(record) {
-          var k, v, _ref;
+          var k, v, _ref, _results;
           if ((this._data[record.type] != null) && (this._data[record.type].records[record.rid] != null)) {
             _ref = this._data[record.type].records[record.rid];
+            _results = [];
             for (k in _ref) {
               v = _ref[k];
               if (k !== "rid") {
-                record[k] = v;
+                _results.push(record[k] = v);
+              } else {
+                _results.push(void 0);
               }
             }
-            return this._dummy.data++;
+            return _results;
           }
         },
         "delete": function(record) {
@@ -116,7 +119,7 @@
     }).call(this);
   </script>
 </polymer-element>
-<polymer-element attributes='rid persist type' name='record-base'>
+<polymer-element attributes='rid persist type noautoload' name='record-base'>
   <template>
     <record-set id='set'></record-set>
   </template>
@@ -124,8 +127,11 @@
     (function() {
       Polymer({
         rid: void 0,
+        persist: void 0,
+        type: "record",
+        noautoload: void 0,
         observe: {
-          '$.set._data': 'load'
+          'all': '_doAutoLoad'
         },
         computed: {
           all: '$.set.all[type]'
@@ -134,7 +140,7 @@
           if (this.persist != null) {
             this.save();
           }
-          if (this.rid != null) {
+          if ((this.rid != null) && (this.noautoload == null)) {
             return this.load();
           }
         },
@@ -147,8 +153,16 @@
         "delete": function() {
           return this.$.set["delete"](this);
         },
+        _doAutoLoad: function() {
+          if (this.noautoload == null) {
+            return this.load();
+          }
+        },
         _lc: function(s) {
           return s.toLowerCase();
+        },
+        noautoloadChanged: function() {
+          return this._doAutoLoad();
         }
       });
     

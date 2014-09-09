@@ -40,7 +40,6 @@
         if @_data[record.type]? and @_data[record.type].records[record.rid]?
           for k,v of @_data[record.type].records[record.rid]
             record[k]= v unless k == "rid"
-          @_dummy.data++
       delete: (record) ->
         if @_data[record.type]? and @_data[record.type].records[record.rid]?
           delete @_data[record.type].records[record.rid]
@@ -50,26 +49,32 @@
           @[type] = (record.rid for id,record of value.records) for type,value of data
           @
 
-%polymer-element(name="record-base" attributes="rid persist type")
+%polymer-element(name="record-base" attributes="rid persist type noautoload")
   %template
     %record-set(id="set")
   :coffeescript
     Polymer
-      rid: undefined,
+      rid: undefined
+      persist: undefined
+      type: "record"
+      noautoload: undefined
       observe: {
-        '$.set._data': 'load' # TODO: overkill ! use fine grained events
+        'all': '_doAutoLoad' # TODO: overkill ! use fine grained events
       }
       computed:
         #type: '_lc(tagName)' # todo auto detection of type name
         all: '$.set.all[type]'
       ready: () ->
         @save() if @persist?
-        @load() if @rid?
+        @load() if @rid? and not @noautoload?
       save: () ->
         @$.set.save @ 
       load: () ->
         @$.set.load @
       delete: () ->
         @$.set.delete @
+      _doAutoLoad: () ->
+        @load() unless @noautoload?
       _lc: (s) -> s.toLowerCase()
+      noautoloadChanged: () -> @_doAutoLoad()
 

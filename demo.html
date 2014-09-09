@@ -12,17 +12,27 @@
       <template>
         <li>
           {{type}}: {{rid}} -> {{label}}
-          <a href='javascript:void(0)' id='a'>Delete</a>
+          <a href='#' id='reload'>Reload</a>
+          <a href='#' id='delete'>Delete</a>
         </li>
       </template>
       <script>
         (function() {
           Polymer('my-record-view', {
             ready: function() {
-              return this.$.a.addEventListener("click", (function(_this) {
-                return function() {
-                  _this["delete"]();
-                  return false;
+              this.load();
+              this.$.reload.addEventListener("click", (function(_this) {
+                return function(e) {
+                  e.preventDefault();
+                  e.returnValue = false;
+                  return _this.load();
+                };
+              })(this));
+              return this.$["delete"].addEventListener("click", (function(_this) {
+                return function(e) {
+                  e.preventDefault();
+                  e.returnValue = false;
+                  return _this["delete"]();
                 };
               })(this));
             }
@@ -36,9 +46,21 @@
         <record-set id='data'></record-set>
         <my-record id='x' label='test' persist rid='1'></my-record>
         <my-record id='y' label='test2' persist rid='2'></my-record>
+        <p>
+          set label to
+          <input id='labelField' type='text'>
+          <a href='#' id='labelFieldClick'>Change</a>
+        </p>
+        <h3>autoloading</h3>
+        <ul>
+          <template repeat='{{$.x.all}}'>
+            <my-record-view rid='{{}}'></my-record-view>
+          </template>
+        </ul>
+        <h3>noautoloading</h3>
         <ul>
           <template repeat='{{$.y.all}}'>
-            <my-record-view rid='{{}}'></my-record-view>
+            <my-record-view noautoload rid='{{}}'></my-record-view>
           </template>
         </ul>
       </template>
@@ -46,6 +68,14 @@
         (function() {
           Polymer('demo-app', {
             ready: function() {
+              this.$.labelFieldClick.addEventListener("click", (function(_this) {
+                return function(e) {
+                  e.preventDefault();
+                  e.returnValue = false;
+                  _this.$.x.label = _this.$.labelField.value;
+                  return _this.$.x.save();
+                };
+              })(this));
               return console.log("ready");
             }
           });
