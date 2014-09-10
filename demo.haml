@@ -11,18 +11,16 @@
       %template
         %li 
           {{type}}: {{rid}} -> {{label}}
-          %template(if="{{noautoload != undefined}}")
-            %a(href="#" id="reload") Reload
+          %a{href:"#", id:"reload", "hidden?"=>"{{noautoload == undefined}}"} Reload
           %a(href="#" id="delete") Delete
       :coffeescript
         Polymer 'my-record-view',
           ready: () ->
             @load()
-            if @$.reload?
-              @$.reload.addEventListener "click", (e) =>
-                e.preventDefault()
-                e.returnValue = false
-                @load()
+            @$.reload.addEventListener "click", (e) =>
+              e.preventDefault()
+              e.returnValue = false
+              @load()
             @$.delete.addEventListener "click", (e) =>
               e.preventDefault()
               e.returnValue = false
@@ -37,8 +35,9 @@
         %p
           set label to
           %input(id="labelField" type="text")
-          %a(href="#" id="labelFieldClick") Change
-        
+          %a{href:"#", id:"labelFieldEditClick", "hidden?"=>"{{$.x.all.length == 0}}"} Change 1st record
+          %a(href="#" id="labelFieldCreateClick") Create new record
+           
         %h3 autoloading
         %ul
           %template(repeat="{{$.x.all}}")
@@ -52,9 +51,16 @@
       :coffeescript
         Polymer 'demo-app',
           ready: () -> 
-            @$.labelFieldClick.addEventListener "click", (e) =>
+            @$.labelFieldEditClick.addEventListener "click", (e) =>
               e.preventDefault()
               e.returnValue = false
+              @$.x.rid = @$.x.all[0]
+              @$.x.label = @$.labelField.value
+              @$.x.save()
+            @$.labelFieldCreateClick.addEventListener "click", (e) =>
+              e.preventDefault()
+              e.returnValue = false
+              @$.x.rid = undefined
               @$.x.label = @$.labelField.value
               @$.x.save()
             console.log "ready"
