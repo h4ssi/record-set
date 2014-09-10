@@ -11,16 +11,18 @@
       %template
         %li 
           {{type}}: {{rid}} -> {{label}}
-          %a(href="#" id="reload") Reload
+          %template(if="{{noautoload != undefined}}")
+            %a(href="#" id="reload") Reload
           %a(href="#" id="delete") Delete
       :coffeescript
         Polymer 'my-record-view',
           ready: () ->
             @load()
-            @$.reload.addEventListener "click", (e) =>
-              e.preventDefault()
-              e.returnValue = false
-              @load()
+            if @$.reload?
+              @$.reload.addEventListener "click", (e) =>
+                e.preventDefault()
+                e.returnValue = false
+                @load()
             @$.delete.addEventListener "click", (e) =>
               e.preventDefault()
               e.returnValue = false

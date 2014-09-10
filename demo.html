@@ -12,7 +12,9 @@
       <template>
         <li>
           {{type}}: {{rid}} -> {{label}}
-          <a href='#' id='reload'>Reload</a>
+          <template if='{{noautoload != undefined}}'>
+            <a href='#' id='reload'>Reload</a>
+          </template>
           <a href='#' id='delete'>Delete</a>
         </li>
       </template>
@@ -21,13 +23,15 @@
           Polymer('my-record-view', {
             ready: function() {
               this.load();
-              this.$.reload.addEventListener("click", (function(_this) {
-                return function(e) {
-                  e.preventDefault();
-                  e.returnValue = false;
-                  return _this.load();
-                };
-              })(this));
+              if (this.$.reload != null) {
+                this.$.reload.addEventListener("click", (function(_this) {
+                  return function(e) {
+                    e.preventDefault();
+                    e.returnValue = false;
+                    return _this.load();
+                  };
+                })(this));
+              }
               return this.$["delete"].addEventListener("click", (function(_this) {
                 return function(e) {
                   e.preventDefault();
