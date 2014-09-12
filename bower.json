@@ -28,6 +28,7 @@
     "vendor"
   ],
   "dependencies": {
-    "polymer": "Polymer/polymer#~0.4.0"
+    "polymer": "Polymer/polymer#~0.4.0",
+    "core-ajax": "Polymer/core-ajax#~0.4.0"
   }
 }

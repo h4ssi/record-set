@@ -1,45 +1,57 @@
 !!! 5
 
 %link(rel="import" href="../polymer/polymer.html")
+%link(rel="import" href="../core-ajax/core-ajax.html")
 
-%polymer-element(name="record-set")
+%polymer-element(name="record-set" attributes="href")
   %template
   :coffeescript
-    data = {}
-    dummy = {data: 0}
-    fields = {}
+    __data = {}
+    __dummy = {data: 0}
+    __href = undefined
+    __fields = {}
     
     getFields = (record) -> 
-      return fields[record.tagName] if fields[record.tagName]?
+      return __fields[record.tagName] if __fields[record.tagName]?
 
       p = HTMLElement.getPrototypeForTag record.tagName
       loop
         throw "not a record: " + record.tagName unless p.element.extends?
         break if p.element.extends == "record-base"
         p = HTMLElement.getPrototypeForTag p.element.extends
-      k for own k,v of p.publish # rid is excluded
+      __fields[record.tagName] = (k for own k,v of p.publish) # rid is excluded
     
     Polymer
+      href: undefined
       _data: undefined
       _dummy: undefined
       computed:
         all: '_extractRecords(_data, _dummy.data)' # TODO dummy was added so changes within _data are observed
       created: () ->
-        @_data = data
-        @_dummy = dummy
-      save: (record) ->
+        @_data = __data
+        @_dummy = __dummy
+      ready: () ->
+        __href = @href if @href?
+        @href = __href if @href != __href
+      save: (record, remote) ->
+        data = record
+        if remote?
+          remote.rid = remote.id
+          delete remote.id
+          data = remote
         @_data[record.type] = { records: {}, next: 1 } unless @_data[record.type]?
-        r = @_data[record.type].records[record.rid]
+        r = @_data[record.type].records[data.rid]
         r = {} unless r?
-        r.rid = @_data[record.type].next++ unless r.rid?
+        unless r.rid?
+          r.rid = if remote? then remote.rid else ("rs:" + @_data[record.type].next++)
         @_data[record.type].records[r.rid] = r
         for k in getFields record
-          r[k] = record[k]
+          r[k] = data[k]
         @_dummy.data++
       load: (record) ->
         if @_data[record.type]? and @_data[record.type].records[record.rid]?
           for k,v of @_data[record.type].records[record.rid]
-            record[k]= v unless k == "rid"
+            record[k] = v unless k == "rid"
       delete: (record) ->
         if @_data[record.type]? and @_data[record.type].records[record.rid]?
           delete @_data[record.type].records[record.rid]
@@ -52,6 +64,7 @@
 %polymer-element(name="record-base" attributes="rid persist type noautoload")
   %template
     %record-set(id="set")
+    %core-ajax(id="ajax" handleAs="json" on-core-response="{{_handleResponse}}")
   :coffeescript
     Polymer
       rid: undefined
@@ -59,7 +72,7 @@
       type: "record"
       noautoload: undefined
       observe: {
-        'all': '_doAutoLoad' # TODO: overkill ! use fine grained events
+        '$.set.all': '_doAutoLoad' # TODO: overkill ! use fine grained events
       }
       computed:
         #type: '_lc(tagName)' # todo auto detection of type name
@@ -73,6 +86,20 @@
         @$.set.load @
       delete: () ->
         @$.set.delete @
+      pull: () ->
+        x = @$.ajax
+        x.url = @$.set.href + "/" + @type
+        x.method = "GET" 
+        x.body = null
+        x.go()
+      _handleResponse: (e, d) ->
+        if Array.isArray d.response
+          for record in d.response
+            @$.set.save @, record 
+        else
+          for k, record of d.response
+            record.id = k unless record.id?
+            @$.set.save @, record
       _doAutoLoad: () ->
         @load() unless @noautoload?
       _lc: (s) -> s.toLowerCase()

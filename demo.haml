@@ -6,7 +6,7 @@
     %link(rel="import" href="../polymer/polymer.html")
     %link(rel="import" href="record-set.html")
   %body
-    %polymer-element(name="my-record" extends="record-base" type="test" attributes="label" noscript)
+    %polymer-element(name="my-record" extends="record-base" type="my-record" attributes="label" noscript)
     %polymer-element(name="my-record-view" extends="my-record")
       %template
         %li 
@@ -27,11 +27,13 @@
               @delete()
     %polymer-element(name="demo-app")
       %template
-        %record-set(id="data")
+        %record-set(id="data" href="http://localhost:9998")
 
-        %my-record(id="x" persist rid="1" label="test")
-        %my-record(id="y" persist rid="2" label="test2")
-        
+        -# will now be loaded via rest
+          %my-record(id="x" persist rid="1" label="test")
+          %my-record(id="y" persist rid="2" label="test2")
+        %my-record(id="x")
+
         %p
           set label to
           %input(id="labelField" type="text")
@@ -45,12 +47,13 @@
 
         %h3 noautoloading
         %ul
-          %template(repeat="{{$.y.all}}")
+          %template(repeat="{{$.x.all}}")
             %my-record-view(rid="{{}}" noautoload)
 
       :coffeescript
         Polymer 'demo-app',
-          ready: () -> 
+          ready: () ->
+            @$.x.pull()
             @$.labelFieldEditClick.addEventListener "click", (e) =>
               e.preventDefault()
               e.returnValue = false
