@@ -64,8 +64,8 @@ server.put '/my-record/:id', (req,res,next) ->
     res.send 400, {error: "invalid label"}
     return next()
 
-  record[id].label = req.params.label.trim()
-  res.send record[id]
+  records[id].label = req.params.label.trim()
+  res.send records[id]
   return next()
 
 server.del '/my-record/:id', (req,res,next) ->
@@ -79,7 +79,7 @@ server.del '/my-record/:id', (req,res,next) ->
     res.send 404, {error: "no such record"}
     return next()
 
-  delete record[id]
+  delete records[id]
   res.send {}
   return next()
 
