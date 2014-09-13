@@ -56,6 +56,7 @@
         if @_data[record.type]? and @_data[record.type].records[record.rid]?
           delete @_data[record.type].records[record.rid]
           @_dummy.data++
+      getRawRecord: (record) -> @_data[record.type].records[record.rid] if @_data[record.type]? and @_data[record.type].records[record.rid]?
       _extractRecords: (data) ->
         new ->
           @[type] = (record.rid for id,record of value.records) for type,value of data
@@ -64,7 +65,8 @@
 %polymer-element(name="record-base" attributes="rid persist type noautoload")
   %template
     %record-set(id="set")
-    %core-ajax(id="ajax" handleAs="json" on-core-response="{{_handleResponse}}")
+    %core-ajax(id="pull" handleAs="json" url="{{$.set.href + '/' + type}}" method="GET" on-core-response="{{_handlePull}}")
+    %core-ajax(id="save" handleAs="json" url="{{$.set.href + '/' + type + '/' + rid}}" method="PUT" on-core-response="{{_handleSave}}" contentType="application/json")
   :coffeescript
     Polymer
       rid: undefined
@@ -87,12 +89,8 @@
       delete: () ->
         @$.set.delete @
       pull: () ->
-        x = @$.ajax
-        x.url = @$.set.href + "/" + @type
-        x.method = "GET" 
-        x.body = null
-        x.go()
-      _handleResponse: (e, d) ->
+        @$.pull.go()
+      _handlePull: (e, d) ->
         if Array.isArray d.response
           for record in d.response
             @$.set.save @, record 
@@ -100,6 +98,12 @@
           for k, record of d.response
             record.id = k unless record.id?
             @$.set.save @, record
+      saveRemote: () ->
+        @save()
+        @$.save.body = JSON.stringify (@$.set.getRawRecord @)
+        @$.save.go()
+      _handleSave: (e, d) ->
+        # TODO: mark as synced?
       _doAutoLoad: () ->
         @load() unless @noautoload?
       _lc: (s) -> s.toLowerCase()

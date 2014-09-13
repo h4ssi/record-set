@@ -116,6 +116,11 @@
             return this._dummy.data++;
           }
         },
+        getRawRecord: function(record) {
+          if ((this._data[record.type] != null) && (this._data[record.type].records[record.rid] != null)) {
+            return this._data[record.type].records[record.rid];
+          }
+        },
         _extractRecords: function(data) {
           return new function() {
             var id, record, type, value;
@@ -143,7 +148,8 @@
 <polymer-element attributes='rid persist type noautoload' name='record-base'>
   <template>
     <record-set id='set'></record-set>
-    <core-ajax handleAs='json' id='ajax' on-core-response='{{_handleResponse}}'></core-ajax>
+    <core-ajax handleAs='json' id='pull' method='GET' on-core-response='{{_handlePull}}' url="{{$.set.href + '/' + type}}"></core-ajax>
+    <core-ajax contentType='application/json' handleAs='json' id='save' method='PUT' on-core-response='{{_handleSave}}' url="{{$.set.href + '/' + type + '/' + rid}}"></core-ajax>
   </template>
   <script>
     (function() {
@@ -176,14 +182,9 @@
           return this.$.set["delete"](this);
         },
         pull: function() {
-          var x;
-          x = this.$.ajax;
-          x.url = this.$.set.href + "/" + this.type;
-          x.method = "GET";
-          x.body = null;
-          return x.go();
+          return this.$.pull.go();
         },
-        _handleResponse: function(e, d) {
+        _handlePull: function(e, d) {
           var k, record, _i, _len, _ref, _ref1, _results, _results1;
           if (Array.isArray(d.response)) {
             _ref = d.response;
@@ -206,6 +207,12 @@
             return _results1;
           }
         },
+        saveRemote: function() {
+          this.save();
+          this.$.save.body = JSON.stringify(this.$.set.getRawRecord(this));
+          return this.$.save.go();
+        },
+        _handleSave: function(e, d) {},
         _doAutoLoad: function() {
           if (this.noautoload == null) {
             return this.load();
