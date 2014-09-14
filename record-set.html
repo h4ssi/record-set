@@ -15,16 +15,15 @@
   <template></template>
   <script>
     (function() {
-      var getFields, __data, __dummy, __fields, __href,
+      var getFields, __data, __fields, __shared,
         __hasProp = {}.hasOwnProperty;
     
       __data = {};
     
-      __dummy = {
-        data: 0
+      __shared = {
+        dummy: 0,
+        href: void 0
       };
-    
-      __href = void 0;
     
       __fields = {};
     
@@ -65,7 +64,7 @@
          */
         href: void 0,
         _data: void 0,
-        _dummy: void 0,
+        _shared: void 0,
         computed: {
     
           /**
@@ -77,19 +76,20 @@
            * @property all
            * @type object
            */
-          all: '_extractRecords(_data, _dummy.data)'
+          all: '_extractRecords(_data, _shared.dummy)'
+        },
+        observe: {
+          '_shared.href': '_syncHref'
         },
         created: function() {
           this._data = __data;
-          return this._dummy = __dummy;
+          return this._shared = __shared;
         },
         ready: function() {
           if (this.href != null) {
-            __href = this.href;
+            this.hrefChanged();
           }
-          if (this.href !== __href) {
-            return this.href = __href;
-          }
+          return this._syncHref();
         },
         save: function(record, remote, prevRid) {
           var data, k, r, _i, _len, _ref;
@@ -123,7 +123,7 @@
             k = _ref[_i];
             r[k] = data[k];
           }
-          return this._dummy.data++;
+          return this._shared.dummy++;
         },
         load: function(record) {
           var k, v, _ref, _results;
@@ -144,7 +144,7 @@
         "delete": function(record) {
           if ((this._data[record.type] != null) && (this._data[record.type].records[record.rid] != null)) {
             delete this._data[record.type].records[record.rid];
-            return this._dummy.data++;
+            return this._shared.dummy++;
           }
         },
         getRawRecord: function(record) {
@@ -170,6 +170,16 @@
             }
             return this;
           };
+        },
+        hrefChanged: function() {
+          if (this.href !== this._shared.href) {
+            return this._shared.href = this.href;
+          }
+        },
+        _syncHref: function() {
+          if (this.href !== this._shared.href) {
+            return this.href = this._shared.href;
+          }
         }
       });
     

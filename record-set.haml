@@ -16,10 +16,11 @@
   %template
   :coffeescript
     __data = {}
-    __dummy = {data: 0}
-    __href = undefined
-    __fields = {}
+    __shared = 
+      dummy: 0
+      href: undefined
     
+    __fields = {}    
     getFields = (record) -> 
       return __fields[record.tagName] if __fields[record.tagName]?
 
@@ -37,9 +38,9 @@
       # @type string
       ###
       href: undefined
-      
+
       _data: undefined
-      _dummy: undefined
+      _shared: undefined
       computed:      
         ###*
         # Readable property enumerating all IDs of all tracked records.
@@ -50,13 +51,15 @@
         # @property all
         # @type object
         ###
-        all: '_extractRecords(_data, _dummy.data)' # TODO dummy was added so changes within _data are observed
+        all: '_extractRecords(_data, _shared.dummy)' # TODO dummy was added so changes within _data are observed
+      observe:
+        '_shared.href': '_syncHref'
       created: () ->
         @_data = __data
-        @_dummy = __dummy
+        @_shared = __shared
       ready: () ->
-        __href = @href if @href?
-        @href = __href if @href != __href
+        @hrefChanged() if @href?
+        @_syncHref()
       save: (record, remote, prevRid) ->
         data = record
         if remote?
@@ -75,7 +78,7 @@
         record.rid = r.rid # write potential new rid back to element
         for k in getFields record
           r[k] = data[k]
-        @_dummy.data++
+        @_shared.dummy++
       load: (record) ->
         if @_data[record.type]? and @_data[record.type].records[record.rid]?
           for k,v of @_data[record.type].records[record.rid]
@@ -83,12 +86,16 @@
       delete: (record) ->
         if @_data[record.type]? and @_data[record.type].records[record.rid]?
           delete @_data[record.type].records[record.rid]
-          @_dummy.data++
+          @_shared.dummy++
       getRawRecord: (record) -> @_data[record.type].records[record.rid] if @_data[record.type]? and @_data[record.type].records[record.rid]?
       _extractRecords: (data) ->
         new ->
           @[type] = (record.rid for id,record of value.records) for type,value of data
           @
+      hrefChanged: () ->
+        @_shared.href = @href unless @href == @_shared.href
+      _syncHref: () ->
+        @href = @_shared.href unless @href == @_shared.href
 
 /
   \/**
