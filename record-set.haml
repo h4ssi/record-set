@@ -65,8 +65,8 @@
 %polymer-element(name="record-base" attributes="rid persist type noautoload")
   %template
     %record-set(id="set")
-    %core-ajax(id="pull" handleAs="json" url="{{$.set.href + '/' + type}}" method="GET" on-core-response="{{_handlePull}}")
-    %core-ajax(id="save" handleAs="json" url="{{$.set.href + '/' + type + '/' + rid}}" method="PUT" on-core-response="{{_handleSave}}" contentType="application/json")
+    %core-ajax(id="pull" handleAs="json" url="{{_resUrl}}" method="GET" on-core-response="{{_handlePull}}")
+    %core-xhr(id="xhr")
   :coffeescript
     Polymer
       rid: undefined
@@ -79,6 +79,8 @@
       computed:
         #type: '_lc(tagName)' # todo auto detection of type name
         all: '$.set.all[type]'
+        _resUrl: "$.set.href + '/' + type"
+        _resIdUrl: "$.set.href + '/' + type + '/' + rid"
       ready: () ->
         @save() if @persist?
         @load() if @rid? and not @noautoload?
@@ -100,10 +102,14 @@
             @$.set.save @, record
       saveRemote: () ->
         @save()
-        @$.save.body = JSON.stringify (@$.set.getRawRecord @)
-        @$.save.go()
-      _handleSave: (e, d) ->
-        # TODO: mark as synced?
+        @$.xhr.request
+          url: @_resIdUrl
+          method: 'PUT'
+          body: JSON.stringify (@$.set.getRawRecord @)
+          responseType: 'json'
+          headers: {'Content-Type': 'application/json'}
+          callback: () =>
+            true # TODO: mark as synced?
       _doAutoLoad: () ->
         @load() unless @noautoload?
       _lc: (s) -> s.toLowerCase()

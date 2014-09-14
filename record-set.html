@@ -148,8 +148,8 @@
 <polymer-element attributes='rid persist type noautoload' name='record-base'>
   <template>
     <record-set id='set'></record-set>
-    <core-ajax handleAs='json' id='pull' method='GET' on-core-response='{{_handlePull}}' url="{{$.set.href + '/' + type}}"></core-ajax>
-    <core-ajax contentType='application/json' handleAs='json' id='save' method='PUT' on-core-response='{{_handleSave}}' url="{{$.set.href + '/' + type + '/' + rid}}"></core-ajax>
+    <core-ajax handleAs='json' id='pull' method='GET' on-core-response='{{_handlePull}}' url='{{_resUrl}}'></core-ajax>
+    <core-xhr id='xhr'></core-xhr>
   </template>
   <script>
     (function() {
@@ -162,7 +162,9 @@
           '$.set.all': '_doAutoLoad'
         },
         computed: {
-          all: '$.set.all[type]'
+          all: '$.set.all[type]',
+          _resUrl: "$.set.href + '/' + type",
+          _resIdUrl: "$.set.href + '/' + type + '/' + rid"
         },
         ready: function() {
           if (this.persist != null) {
@@ -209,10 +211,21 @@
         },
         saveRemote: function() {
           this.save();
-          this.$.save.body = JSON.stringify(this.$.set.getRawRecord(this));
-          return this.$.save.go();
+          return this.$.xhr.request({
+            url: this._resIdUrl,
+            method: 'PUT',
+            body: JSON.stringify(this.$.set.getRawRecord(this)),
+            responseType: 'json',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            callback: (function(_this) {
+              return function() {
+                return true;
+              };
+            })(this)
+          });
         },
-        _handleSave: function(e, d) {},
         _doAutoLoad: function() {
           if (this.noautoload == null) {
             return this.load();
