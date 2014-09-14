@@ -252,6 +252,24 @@
             })(this)
           });
         },
+        deleteRemote: function() {
+          var rid;
+          rid = this.rid;
+          this.$.xhr.request({
+            url: this._resIdUrl,
+            method: 'DELETE',
+            responseType: 'json',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            callback: (function(_this) {
+              return function(r) {
+                return true;
+              };
+            })(this)
+          });
+          return this["delete"]();
+        },
         _doAutoLoad: function() {
           if (this.noautoload == null) {
             return this.load();

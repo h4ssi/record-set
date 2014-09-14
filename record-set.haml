@@ -126,6 +126,16 @@
           headers: {'Content-Type': 'application/json'}
           callback: (r) =>
             @$.set.save @, r, rid
+      deleteRemote: () ->
+        rid = @rid
+        @$.xhr.request
+          url: @_resIdUrl
+          method: 'DELETE'
+          responseType: 'json'
+          headers: {'Content-Type': 'application/json'}
+          callback: (r) =>
+            true # TODO: restore record locally on error
+        @delete()
       _doAutoLoad: () ->
         @load() unless @noautoload?
       _lc: (s) -> s.toLowerCase()

@@ -24,7 +24,7 @@
             @$.delete.addEventListener "click", (e) =>
               e.preventDefault()
               e.returnValue = false
-              @delete()
+              @deleteRemote()
     %polymer-element(name="demo-app")
       %template
         %record-set(id="data" href="http://localhost:9998")
