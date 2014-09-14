@@ -3,7 +3,7 @@ restify = require 'restify'
 
 server = restify.createServer
   name: 'record-set-test-server'
-  version: '0.0.0'
+  version: '0.0.1'
 
 server.use restify.queryParser()
 server.use restify.bodyParser()

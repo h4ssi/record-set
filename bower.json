@@ -1,6 +1,6 @@
 {
   "name": "record-set",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "homepage": "https://github.com/H4ssi/record-set",
   "authors": [
     "Florian Hassanen <florian.hassanen@gmail.com>"
@@ -14,7 +14,6 @@
     "record"
   ],
   "license": "MIT",
-  "private": true,
   "ignore": [
     "**/.*",
     "**/*.coffee",
@@ -23,8 +22,7 @@
     "Gemfile*",
     "node_modules",
     "bower_components",
-    "test",
-    "tests",
+    "test*",
     "vendor"
   ],
   "dependencies": {
