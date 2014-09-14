@@ -25,14 +25,22 @@
                 return function(e) {
                   e.preventDefault();
                   e.returnValue = false;
-                  return _this.loadRemote();
+                  if (_this.$.set.href != null) {
+                    return _this.loadRemote();
+                  } else {
+                    return _this.load();
+                  }
                 };
               })(this));
               return this.$["delete"].addEventListener("click", (function(_this) {
                 return function(e) {
                   e.preventDefault();
                   e.returnValue = false;
-                  return _this.deleteRemote();
+                  if (_this.$.set.href != null) {
+                    return _this.deleteRemote();
+                  } else {
+                    return _this["delete"]();
+                  }
                 };
               })(this));
             }
@@ -43,8 +51,16 @@
     </polymer-element>
     <polymer-element name='demo-app'>
       <template>
-        <record-set href='http://localhost:9998' id='data'></record-set>
+        <record-set id='data'></record-set>
         <my-record id='x'></my-record>
+        <p>
+          REST endpoint URL
+          <b hidden?='{{!$.data.href}}'>currently connected to {{$.data.href}}</b>
+          <b hidden?='{{$.data.href}}'>currently using local DB</b>
+          <input id='rest' type='text' value='http://localhost:9998'>
+          <a hidden?="{{$.rest.value == ''}}" href='#' id='restConnectClick'>Connect</a>
+          <a hidden?="{{$.data.href == ''}}" href='#' id='noRest'>Use local database only (a.k.a. disconnect)</a>
+        </p>
         <p>
           set label to
           <input id='labelField' type='text'>
@@ -68,14 +84,34 @@
         (function() {
           Polymer('demo-app', {
             ready: function() {
-              this.$.x.pull();
+              this.$.restConnectClick.addEventListener("click", (function(_this) {
+                return function(e) {
+                  e.preventDefault();
+                  e.returnValue = false;
+                  _this.$.data.href = _this.$.rest.value;
+                  return _this.async(function() {
+                    return _this.$.x.pull();
+                  });
+                };
+              })(this));
+              this.$.noRest.addEventListener("click", (function(_this) {
+                return function(e) {
+                  e.preventDefault();
+                  e.returnValue = false;
+                  return _this.$.data.href = void 0;
+                };
+              })(this));
               this.$.labelFieldEditClick.addEventListener("click", (function(_this) {
                 return function(e) {
                   e.preventDefault();
                   e.returnValue = false;
                   _this.$.x.rid = _this.$.x.all[0];
                   _this.$.x.label = _this.$.labelField.value;
-                  return _this.$.x.saveRemote();
+                  if (_this.$.data.href != null) {
+                    return _this.$.x.saveRemote();
+                  } else {
+                    return _this.$.x.save();
+                  }
                 };
               })(this));
               this.$.labelFieldCreateClick.addEventListener("click", (function(_this) {
@@ -84,7 +120,11 @@
                   e.returnValue = false;
                   _this.$.x.rid = void 0;
                   _this.$.x.label = _this.$.labelField.value;
-                  return _this.$.x.createRemote();
+                  if (_this.$.data.href != null) {
+                    return _this.$.x.createRemote();
+                  } else {
+                    return _this.$.x.save();
+                  }
                 };
               })(this));
               return console.log("ready");

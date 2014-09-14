@@ -20,20 +20,33 @@
             @$.reload.addEventListener "click", (e) =>
               e.preventDefault()
               e.returnValue = false
-              @loadRemote()
+              if @$.set.href?
+                @loadRemote()
+              else
+                @load()
             @$.delete.addEventListener "click", (e) =>
               e.preventDefault()
               e.returnValue = false
-              @deleteRemote()
+              if @$.set.href?
+                @deleteRemote()
+              else
+                @delete()
     %polymer-element(name="demo-app")
       %template
-        %record-set(id="data" href="http://localhost:9998")
+        %record-set(id="data")
 
         -# will now be loaded via rest
           %my-record(id="x" persist rid="1" label="test")
           %my-record(id="y" persist rid="2" label="test2")
         %my-record(id="x")
 
+        %p
+          REST endpoint URL
+          %b{"hidden?"=>"{{!$.data.href}}"} currently connected to {{$.data.href}}
+          %b{"hidden?"=>"{{$.data.href}}"} currently using local DB
+          %input(id="rest" type="text" value="http://localhost:9998")
+          %a{href:"#", id:"restConnectClick", "hidden?"=>"{{$.rest.value == ''}}"} Connect
+          %a{href:"#", id:"noRest", "hidden?"=>"{{$.data.href == ''}}"} Use local database only (a.k.a. disconnect)
         %p
           set label to
           %input(id="labelField" type="text")
@@ -53,18 +66,36 @@
       :coffeescript
         Polymer 'demo-app',
           ready: () ->
-            @$.x.pull()
+            @$.restConnectClick.addEventListener "click", (e) =>
+              e.preventDefault()
+              e.returnValue = false
+              @$.data.href = @$.rest.value
+              this.async () => @$.x.pull()
+
+            @$.noRest.addEventListener "click", (e) =>
+              e.preventDefault()
+              e.returnValue = false
+              @$.data.href = undefined
+
             @$.labelFieldEditClick.addEventListener "click", (e) =>
               e.preventDefault()
               e.returnValue = false
               @$.x.rid = @$.x.all[0]
               @$.x.label = @$.labelField.value
-              @$.x.saveRemote()
+              if @$.data.href?
+                @$.x.saveRemote()
+              else
+                @$.x.save()
+
             @$.labelFieldCreateClick.addEventListener "click", (e) =>
               e.preventDefault()
               e.returnValue = false
               @$.x.rid = undefined
               @$.x.label = @$.labelField.value
-              @$.x.createRemote()
+              if @$.data.href?
+                @$.x.createRemote()
+              else
+                @$.x.save()
+
             console.log "ready"
     %demo-app
