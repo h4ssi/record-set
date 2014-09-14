@@ -262,7 +262,10 @@
               'Content-Type': 'application/json'
             },
             callback: (function(_this) {
-              return function(r) {
+              return function(r, x) {
+                if (x.status === 404) {
+                  return _this["delete"]();
+                }
                 _this.$.set.save(_this, r);
                 return _this.load();
               };

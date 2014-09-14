@@ -133,7 +133,8 @@
           method: 'GET'
           responseType: 'json'
           headers: {'Content-Type': 'application/json'}
-          callback: (r) =>
+          callback: (r,x) =>
+            return @delete() if x.status == 404
             @$.set.save @, r
             @load()
       deleteRemote: () ->
