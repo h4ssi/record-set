@@ -3,6 +3,15 @@
 %link(rel="import" href="../polymer/polymer.html")
 %link(rel="import" href="../core-ajax/core-ajax.html")
 
+/
+  \/** 
+  * Defines the REST endpoint, that will be used to access and store records.
+  * e.g.
+  *
+  *     <record-set href="http://example.com/api"></record-set>
+  *
+  * @element record-set
+  */
 %polymer-element(name="record-set" attributes="href")
   %template
   :coffeescript
@@ -22,10 +31,25 @@
       __fields[record.tagName] = (k for own k,v of p.publish) # rid is excluded
     
     Polymer
+      ###*
+      # Base location of the REST endpoint
+      # @attribute href
+      # @type string
+      ###
       href: undefined
+      
       _data: undefined
       _dummy: undefined
-      computed:
+      computed:      
+        ###*
+        # Readable property enumerating all IDs of all tracked records.
+        # The IDs are grouped by type: e.g.
+        #
+        #     set.all['my-record-type'] == [1,2,3]
+        #
+        # @property all
+        # @type object
+        ###
         all: '_extractRecords(_data, _dummy.data)' # TODO dummy was added so changes within _data are observed
       created: () ->
         @_data = __data
@@ -66,6 +90,26 @@
           @[type] = (record.rid for id,record of value.records) for type,value of data
           @
 
+/
+  \/**
+  * Base for defining records.
+  *
+  * Define your record types by extending this element. e.g.
+  *
+  *     <polymer-element name="my-record" extends="record-base" type="rest-name" attributes="field anotherField ..." noscript></polymer-element>
+  *
+  * To define your views to your records, you could extend 'my-record' once more. e.g.
+  *
+  *     <polymer-element name="my-record-view" extends="my-record" noscript>
+  *       <template>
+  *         field: {{field}} - anotherField: {{anotherField}} ...
+  *       </template>
+  *     </polymer-element>
+  *
+  * The URL for accessing and storing these records is constructed by prepending the `record-set.href` to the `record-base.type`.
+  *
+  * @element record-base
+  */
 %polymer-element(name="record-base" attributes="rid persist type noautoload")
   %template
     %record-set(id="set")
@@ -73,27 +117,96 @@
     %core-xhr(id="xhr")
   :coffeescript
     Polymer
+      ###*
+      # ID of record, due to the collision with the id HTML attribute, it is named rid.
+      # 
+      # The REST endpoint must include an 'id' property, when providing its resources. e.g.
+      # 
+      #     {"id":1,"field":"value1",...}
+      #
+      # If rid is not set (`undefined`), it means that the record currently represented in this element is not yet stored (either locally or remotely)
+      # Records, stored locally, but not synced to the remote endpoint will still have its rid attribute set (to an internal id).
+      # @attribute rid
+      # @type string
+      # @default undefined
+      ###
       rid: undefined
+      
+      ###*
+      # Set this attribute, to immediately persist the record in the local storage. Can be used to describe an initial database.
+      #
+      #     <my-record persist field="data" ...></my-record>
+      # @attribute persist
+      # @type boolean
+      # @default false
+      ###
       persist: undefined
+      
+      ###*
+      # The name of this kind of records. Used to construct REST URLs.
+      # @attribute type
+      # @type string
+      ###
       type: "record"
+
+      ###*
+      # Normally, the element's data is reloaded/refreshed, whenever the corresponding record in the local database is changed.
+      # Set to _not_ reload the element's data automatically.
+      # @attribute noautoload
+      # @type boolean
+      # @default false
+      ### 
       noautoload: undefined
       observe: {
         '$.set.all': '_doAutoLoad' # TODO: overkill ! use fine grained events
       }
       computed:
         #type: '_lc(tagName)' # todo auto detection of type name
+        
+        ###*
+        # Enumerates IDs of all tracked records of the current type.
+        # @property all
+        # @type array
+        ###
         all: '$.set.all[type]'
         _resUrl: "$.set.href + '/' + type"
         _resIdUrl: "$.set.href + '/' + type + '/' + rid"
       ready: () ->
         @save() if @persist?
         @load() if @rid? and not @noautoload?
+      
+      ###*
+      # Save the element's current data into the local database.
+      # If `rid` is set, the corresponding record will be updated, otherwise a new record is created and the elements `rid` is set to the new ID.
+      # @method save
+      ###
       save: () ->
         @$.set.save @ 
+      
+      ###*
+      # Load a record from the local database into the element's current data.
+      # The record to be loaded is determined by the `rid` attribute, hence it must be set prior to loading the record.
+      # @method load
+      ###
       load: () ->
         @$.set.load @
+
+      ###*
+      # Delete the element's current record from the local database.
+      # The record to be deleted is determined by the `rid` attribute, hence it must be set prior to deleting the record.
+      # @method delete
+      ###
       delete: () ->
         @$.set.delete @
+
+      ###*
+      # Fetches all records of this type from the REST endpoint.
+      # 
+      # `GET record-set.href + '/' + record-base.type`
+      #
+      # The received records are stored in the local database.
+      # @method pull
+      ###
       pull: () ->
         @$.pull.go()
       _handlePull: (e, d) ->
@@ -104,6 +217,14 @@
           for k, record of d.response
             record.id = k unless record.id?
             @$.set.save @, record
+
+      ###*
+      # Updates the element's current data to the REST endpoint.
+      # 
+      # `PUT record-set.href + '/' + record-base.type + '/' + record-base.rid` 
+      #
+      # @method saveRemote
+      ###
       saveRemote: () ->
         @save()
         rid = @rid
@@ -115,6 +236,14 @@
           headers: {'Content-Type': 'application/json'}
           callback: (r) =>
             true # TODO: mark as synced?
+      
+      ###*
+      # Creates the element's current data as a new resource at the REST endpoint.
+      # 
+      # `POST record-set.href + '/' + record-base.type
+      #
+      # @method createRemote
+      ###
       createRemote: () ->
         @save()
         rid = @rid
@@ -126,6 +255,16 @@
           headers: {'Content-Type': 'application/json'}
           callback: (r) =>
             @$.set.save @, r, rid
+
+      ###*
+      # Loads the resource from its REST endpoint into the element's current data.
+      # 
+      # `GET record-set.href + '/' + record-base.type + '/' + record-base.rid` 
+      #
+      # The record to be loaded is determined by the `rid` attribute, hence it must be set prior to loading the record.
+      # If the response status code is 404 the record will be removed from the local database as well.
+      # @method loadRemote
+      ###
       loadRemote: () ->
         @load()
         @$.xhr.request
@@ -137,6 +276,15 @@
             return @delete() if x.status == 404
             @$.set.save @, r
             @load()
+      
+      ###*
+      # Deletes a record at its REST endpoint.
+      # 
+      # `DELETE record-set.href + '/' + record-base.type + '/' + record-base.rid` 
+      #
+      # The record to be deleted is determined by the `rid` attribute, hence it must be set prior to deleting the record.
+      # @method deleteRemote
+      ###
       deleteRemote: () ->
         rid = @rid
         @$.xhr.request

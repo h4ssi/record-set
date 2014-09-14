@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <link href='../polymer/polymer.html' rel='import'>
 <link href='../core-ajax/core-ajax.html' rel='import'>
+<!--
+  /**
+  * Defines the REST endpoint, that will be used to access and store records.
+  * e.g.
+  *
+  *     <record-set href="http://example.com/api"></record-set>
+  *
+  * @element record-set
+  */
+-->
 <polymer-element attributes='href' name='record-set'>
   <template></template>
   <script>
@@ -47,10 +57,26 @@
       };
     
       Polymer({
+    
+        /**
+         * Base location of the REST endpoint
+         * @attribute href
+         * @type string
+         */
         href: void 0,
         _data: void 0,
         _dummy: void 0,
         computed: {
+    
+          /**
+           * Readable property enumerating all IDs of all tracked records.
+           * The IDs are grouped by type: e.g.
+           *
+           *     set.all['my-record-type'] == [1,2,3]
+           *
+           * @property all
+           * @type object
+           */
           all: '_extractRecords(_data, _dummy.data)'
         },
         created: function() {
@@ -150,6 +176,27 @@
     }).call(this);
   </script>
 </polymer-element>
+<!--
+  /**
+  * Base for defining records.
+  *
+  * Define your record types by extending this element. e.g.
+  *
+  *     <polymer-element name="my-record" extends="record-base" type="rest-name" attributes="field anotherField ..." noscript></polymer-element>
+  *
+  * To define your views to your records, you could extend 'my-record' once more. e.g.
+  *
+  *     <polymer-element name="my-record-view" extends="my-record" noscript>
+  *       <template>
+  *         field: {{field}} - anotherField: {{anotherField}} ...
+  *       </template>
+  *     </polymer-element>
+  *
+  * The URL for accessing and storing these records is constructed by prepending the `record-set.href` to the `record-base.type`.
+  *
+  * @element record-base
+  */
+-->
 <polymer-element attributes='rid persist type noautoload' name='record-base'>
   <template>
     <record-set id='set'></record-set>
@@ -159,14 +206,57 @@
   <script>
     (function() {
       Polymer({
+    
+        /**
+         * ID of record, due to the collision with the id HTML attribute, it is named rid.
+         * 
+         * The REST endpoint must include an 'id' property, when providing its resources. e.g.
+         * 
+         *     {"id":1,"field":"value1",...}
+         *
+         * If rid is not set (`undefined`), it means that the record currently represented in this element is not yet stored (either locally or remotely)
+         * Records, stored locally, but not synced to the remote endpoint will still have its rid attribute set (to an internal id).
+         * @attribute rid
+         * @type string
+         * @default undefined
+         */
         rid: void 0,
+    
+        /**
+         * Set this attribute, to immediately persist the record in the local storage. Can be used to describe an initial database.
+         *
+         *     <my-record persist field="data" ...></my-record>
+         * @attribute persist
+         * @type boolean
+         * @default false
+         */
         persist: void 0,
+    
+        /**
+         * The name of this kind of records. Used to construct REST URLs.
+         * @attribute type
+         * @type string
+         */
         type: "record",
+    
+        /**
+         * Normally, the element's data is reloaded/refreshed, whenever the corresponding record in the local database is changed.
+         * Set to _not_ reload the element's data automatically.
+         * @attribute noautoload
+         * @type boolean
+         * @default false
+         */
         noautoload: void 0,
         observe: {
           '$.set.all': '_doAutoLoad'
         },
         computed: {
+    
+          /**
+           * Enumerates IDs of all tracked records of the current type.
+           * @property all
+           * @type array
+           */
           all: '$.set.all[type]',
           _resUrl: "$.set.href + '/' + type",
           _resIdUrl: "$.set.href + '/' + type + '/' + rid"
@@ -179,15 +269,42 @@
             return this.load();
           }
         },
+    
+        /**
+         * Save the element's current data into the local database.
+         * If `rid` is set, the corresponding record will be updated, otherwise a new record is created and the elements `rid` is set to the new ID.
+         * @method save
+         */
         save: function() {
           return this.$.set.save(this);
         },
+    
+        /**
+         * Load a record from the local database into the element's current data.
+         * The record to be loaded is determined by the `rid` attribute, hence it must be set prior to loading the record.
+         * @method load
+         */
         load: function() {
           return this.$.set.load(this);
         },
+    
+        /**
+         * Delete the element's current record from the local database.
+         * The record to be deleted is determined by the `rid` attribute, hence it must be set prior to deleting the record.
+         * @method delete
+         */
         "delete": function() {
           return this.$.set["delete"](this);
         },
+    
+        /**
+         * Fetches all records of this type from the REST endpoint.
+         * 
+         * `GET record-set.href + '/' + record-base.type`
+         *
+         * The received records are stored in the local database.
+         * @method pull
+         */
         pull: function() {
           return this.$.pull.go();
         },
@@ -214,6 +331,14 @@
             return _results1;
           }
         },
+    
+        /**
+         * Updates the element's current data to the REST endpoint.
+         * 
+         * `PUT record-set.href + '/' + record-base.type + '/' + record-base.rid` 
+         *
+         * @method saveRemote
+         */
         saveRemote: function() {
           var rid;
           this.save();
@@ -233,6 +358,14 @@
             })(this)
           });
         },
+    
+        /**
+         * Creates the element's current data as a new resource at the REST endpoint.
+         * 
+         * `POST record-set.href + '/' + record-base.type
+         *
+         * @method createRemote
+         */
         createRemote: function() {
           var rid;
           this.save();
@@ -252,6 +385,16 @@
             })(this)
           });
         },
+    
+        /**
+         * Loads the resource from its REST endpoint into the element's current data.
+         * 
+         * `GET record-set.href + '/' + record-base.type + '/' + record-base.rid` 
+         *
+         * The record to be loaded is determined by the `rid` attribute, hence it must be set prior to loading the record.
+         * If the response status code is 404 the record will be removed from the local database as well.
+         * @method loadRemote
+         */
         loadRemote: function() {
           this.load();
           return this.$.xhr.request({
@@ -272,6 +415,15 @@
             })(this)
           });
         },
+    
+        /**
+         * Deletes a record at its REST endpoint.
+         * 
+         * `DELETE record-set.href + '/' + record-base.type + '/' + record-base.rid` 
+         *
+         * The record to be deleted is determined by the `rid` attribute, hence it must be set prior to deleting the record.
+         * @method deleteRemote
+         */
         deleteRemote: function() {
           var rid;
           rid = this.rid;
