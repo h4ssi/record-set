@@ -5,6 +5,10 @@
     %script(src="../platform/platform.js")
     %link(rel="import" href="../polymer/polymer.html")
     %link(rel="import" href="record-set.html")
+  :css
+    body {
+      font-family: monospace;
+    }
   %body
     %polymer-element(name="my-record" extends="record-base" type="my-record" attributes="label" noscript)
     %polymer-element(name="my-record-view" extends="my-record")
@@ -70,12 +74,21 @@
               e.preventDefault()
               e.returnValue = false
               @$.data.href = @$.rest.value
-              this.async () => @$.x.pull()
+              this.async () => 
+                @$.data.clear()
+                @$.x.pull()
 
             @$.noRest.addEventListener "click", (e) =>
               e.preventDefault()
               e.returnValue = false
               @$.data.href = undefined
+              @$.data.clear()
+              @$.x.rid = undefined
+              @$.x.label = "record #1"
+              @$.x.save()
+              @$.x.rid = undefined
+              @$.x.label = "record #2"
+              @$.x.save()
 
             @$.labelFieldEditClick.addEventListener "click", (e) =>
               e.preventDefault()

@@ -91,6 +91,20 @@
           }
           return this._syncHref();
         },
+    
+        /**
+         * Clear all locally store data
+         * @method clear
+         */
+        clear: function() {
+          var k, v, _ref;
+          _ref = this._data;
+          for (k in _ref) {
+            v = _ref[k];
+            delete this._data[k];
+          }
+          return this._shared.dummy = 0;
+        },
         save: function(record, remote, prevRid) {
           var data, k, r, _i, _len, _ref;
           data = record;

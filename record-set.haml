@@ -60,6 +60,15 @@
       ready: () ->
         @hrefChanged() if @href?
         @_syncHref()
+
+      ###*
+      # Clear all locally store data
+      # @method clear
+      ###
+      clear: () ->
+        for k,v of @_data
+          delete @_data[k]
+        @_shared.dummy = 0
       save: (record, remote, prevRid) ->
         data = record
         if remote?
