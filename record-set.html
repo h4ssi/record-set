@@ -65,7 +65,7 @@
             return this.href = __href;
           }
         },
-        save: function(record, remote) {
+        save: function(record, remote, prevRid) {
           var data, k, r, _i, _len, _ref;
           data = record;
           if (remote != null) {
@@ -79,14 +79,19 @@
               next: 1
             };
           }
-          r = this._data[record.type].records[data.rid];
+          r = this._data[record.type].records[prevRid || data.rid];
           if (r == null) {
             r = {};
+          }
+          if ((prevRid != null) && (r.rid = prevRid)) {
+            delete this._data[record.type].records[prevRid];
+            r.rid = data.rid;
           }
           if (r.rid == null) {
             r.rid = remote != null ? remote.rid : "rs:" + this._data[record.type].next++;
           }
           this._data[record.type].records[r.rid] = r;
+          record.rid = r.rid;
           _ref = getFields(record);
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             k = _ref[_i];
@@ -210,7 +215,9 @@
           }
         },
         saveRemote: function() {
+          var rid;
           this.save();
+          rid = this.rid;
           return this.$.xhr.request({
             url: this._resIdUrl,
             method: 'PUT',
@@ -220,8 +227,27 @@
               'Content-Type': 'application/json'
             },
             callback: (function(_this) {
-              return function() {
+              return function(r) {
                 return true;
+              };
+            })(this)
+          });
+        },
+        createRemote: function() {
+          var rid;
+          this.save();
+          rid = this.rid;
+          return this.$.xhr.request({
+            url: this._resUrl,
+            method: 'POST',
+            body: JSON.stringify(this.$.set.getRawRecord(this)),
+            responseType: 'json',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            callback: (function(_this) {
+              return function(r) {
+                return _this.$.set.save(_this, r, rid);
               };
             })(this)
           });

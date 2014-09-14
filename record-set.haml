@@ -33,18 +33,22 @@
       ready: () ->
         __href = @href if @href?
         @href = __href if @href != __href
-      save: (record, remote) ->
+      save: (record, remote, prevRid) ->
         data = record
         if remote?
           remote.rid = remote.id
           delete remote.id
           data = remote
         @_data[record.type] = { records: {}, next: 1 } unless @_data[record.type]?
-        r = @_data[record.type].records[data.rid]
+        r = @_data[record.type].records[prevRid || data.rid]
         r = {} unless r?
+        if prevRid? and r.rid = prevRid
+          delete @_data[record.type].records[prevRid]
+          r.rid = data.rid
         unless r.rid?
           r.rid = if remote? then remote.rid else ("rs:" + @_data[record.type].next++)
         @_data[record.type].records[r.rid] = r
+        record.rid = r.rid # write potential new rid back to element
         for k in getFields record
           r[k] = data[k]
         @_dummy.data++
@@ -102,14 +106,26 @@
             @$.set.save @, record
       saveRemote: () ->
         @save()
+        rid = @rid
         @$.xhr.request
           url: @_resIdUrl
           method: 'PUT'
           body: JSON.stringify (@$.set.getRawRecord @)
           responseType: 'json'
           headers: {'Content-Type': 'application/json'}
-          callback: () =>
+          callback: (r) =>
             true # TODO: mark as synced?
+      createRemote: () ->
+        @save()
+        rid = @rid
+        @$.xhr.request
+          url: @_resUrl
+          method: 'POST'
+          body: JSON.stringify (@$.set.getRawRecord @)
+          responseType: 'json'
+          headers: {'Content-Type': 'application/json'}
+          callback: (r) =>
+            @$.set.save @, r, rid
       _doAutoLoad: () ->
         @load() unless @noautoload?
       _lc: (s) -> s.toLowerCase()
