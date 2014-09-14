@@ -1,0 +1,7 @@
+{
+  "name": "record-set#gh-pages",
+  "private": true,
+  "dependencies": {
+    "record-set": "H4ssi/record-set#master"
+  }
+}

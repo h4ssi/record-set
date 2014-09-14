@@ -1,0 +1,41 @@
+{
+  "name": "record-set",
+  "homepage": "https://github.com/H4ssi/record-set",
+  "authors": [
+    "Florian Hassanen <florian.hassanen@gmail.com>"
+  ],
+  "description": "record-set",
+  "main": "record-set.html",
+  "keywords": [
+    "polymer",
+    "model",
+    "records",
+    "record"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "**/*.coffee",
+    "**/*.haml",
+    "package.json",
+    "Gemfile*",
+    "node_modules",
+    "bower_components",
+    "test*",
+    "vendor"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#~0.4.0",
+    "core-ajax": "Polymer/core-ajax#~0.4.0"
+  },
+  "_release": "8cebfd2997",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "8cebfd2997ea97fb8b6412c8587b2f16aa06df3b"
+  },
+  "_source": "git://github.com/H4ssi/record-set.git",
+  "_target": "master",
+  "_originalSource": "H4ssi/record-set",
+  "_direct": true
+}
