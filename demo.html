@@ -25,7 +25,7 @@
                 return function(e) {
                   e.preventDefault();
                   e.returnValue = false;
-                  return _this.load();
+                  return _this.loadRemote();
                 };
               })(this));
               return this.$["delete"].addEventListener("click", (function(_this) {

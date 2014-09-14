@@ -126,6 +126,16 @@
           headers: {'Content-Type': 'application/json'}
           callback: (r) =>
             @$.set.save @, r, rid
+      loadRemote: () ->
+        @load()
+        @$.xhr.request
+          url: @_resIdUrl
+          method: 'GET'
+          responseType: 'json'
+          headers: {'Content-Type': 'application/json'}
+          callback: (r) =>
+            @$.set.save @, r
+            @load()
       deleteRemote: () ->
         rid = @rid
         @$.xhr.request

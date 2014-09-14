@@ -252,6 +252,23 @@
             })(this)
           });
         },
+        loadRemote: function() {
+          this.load();
+          return this.$.xhr.request({
+            url: this._resIdUrl,
+            method: 'GET',
+            responseType: 'json',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            callback: (function(_this) {
+              return function(r) {
+                _this.$.set.save(_this, r);
+                return _this.load();
+              };
+            })(this)
+          });
+        },
         deleteRemote: function() {
           var rid;
           rid = this.rid;
