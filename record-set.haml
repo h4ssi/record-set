@@ -185,8 +185,9 @@
         # @type array
         ###
         all: '$.set.all[type]'
-        _resUrl: "$.set.href + '/' + type"
-        _resIdUrl: "$.set.href + '/' + type + '/' + rid"
+        _resUrl: "_urlConcat($.set.href, type)"
+        _resIdUrl: "_urlConcat($.set.href, type, rid)"
+      _urlConcat: (cs...) -> ((if c? then c.replace(/\/+$/, '') else '') for c in cs).join('/')
       ready: () ->
         @save() if @persist?
         @load() if @rid? and not @noautoload?

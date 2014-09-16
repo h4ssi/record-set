@@ -229,6 +229,8 @@
   </template>
   <script>
     (function() {
+      var __slice = [].slice;
+    
       Polymer({
     
         /**
@@ -282,8 +284,21 @@
            * @type array
            */
           all: '$.set.all[type]',
-          _resUrl: "$.set.href + '/' + type",
-          _resIdUrl: "$.set.href + '/' + type + '/' + rid"
+          _resUrl: "_urlConcat($.set.href, type)",
+          _resIdUrl: "_urlConcat($.set.href, type, rid)"
+        },
+        _urlConcat: function() {
+          var c, cs;
+          cs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+          return ((function() {
+            var _i, _len, _results;
+            _results = [];
+            for (_i = 0, _len = cs.length; _i < _len; _i++) {
+              c = cs[_i];
+              _results.push(c != null ? c.replace(/\/+$/, '') : '');
+            }
+            return _results;
+          })()).join('/');
         },
         ready: function() {
           if (this.persist != null) {
