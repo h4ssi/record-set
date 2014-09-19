@@ -221,7 +221,7 @@
   * @element record-base
   */
 -->
-<polymer-element attributes='rid persist type noautoload' name='record-base'>
+<polymer-element attributes='rid persist type noautoload parent' name='record-base'>
   <template>
     <record-set id='set'></record-set>
     <core-ajax handleAs='json' id='pull' method='GET' on-core-response='{{_handlePull}}' url='{{_resUrl}}'></core-ajax>
@@ -229,8 +229,6 @@
   </template>
   <script>
     (function() {
-      var __slice = [].slice;
-    
       Polymer({
     
         /**
@@ -252,6 +250,7 @@
          * Set this attribute, to immediately persist the record in the local storage. Can be used to describe an initial database.
          *
          *     <my-record persist field="data" ...></my-record>
+         *
          * @attribute persist
          * @type boolean
          * @default false
@@ -273,6 +272,22 @@
          * @default false
          */
         noautoload: void 0,
+    
+        /**
+         * You may nest REST resource. e.g.
+         * 
+         *     GET /forum/General+Discussion/thread/Arbitrary+Thread
+         *
+         * Use the parent attribute to represent this nested resources; like so:
+         *
+         *     <forum-record  id="forum"  rid="General Discussion" ...></forum-record>
+         *     <thread-record id="thread" rid="Arbitrary Thread"   parent="{{$.forum}}" ...></thread-record>
+         *
+         * @attribute parent
+         * @type object (record-base)
+         * @default undefined
+         */
+        parent: void 0,
         observe: {
           '$.set.all': '_doAutoLoad'
         },
@@ -284,21 +299,21 @@
            * @type array
            */
           all: '$.set.all[type]',
-          _resUrl: "_urlConcat($.set.href, type)",
-          _resIdUrl: "_urlConcat($.set.href, type, rid)"
+          _resPath: "_pathConcat(parent ? parent._resPath : [], type, rid)",
+          _resUrl: "_urlConcat($.set.href, _resPath, false)",
+          _resIdUrl: "_urlConcat($.set.href, _resPath, true)"
         },
-        _urlConcat: function() {
-          var c, cs;
-          cs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-          return ((function() {
-            var _i, _len, _results;
-            _results = [];
-            for (_i = 0, _len = cs.length; _i < _len; _i++) {
-              c = cs[_i];
-              _results.push(c != null ? c.replace(/\/+$/, '') : '');
-            }
-            return _results;
-          })()).join('/');
+        _pathConcat: function(parentPath, type, rid) {
+          var r;
+          r = parentPath.slice();
+          r.push(type);
+          r.push(rid);
+          return r;
+        },
+        _urlConcat: function(base, path, includeId) {
+          var cleanBase;
+          cleanBase = base != null ? base.replace(/\/+$/, '') : '';
+          return cleanBase + '/' + (includeId ? path : path.slice(0, -1)).join('/');
         },
         ready: function() {
           if (this.persist != null) {

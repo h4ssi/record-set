@@ -49,6 +49,9 @@ server.get '/my-record/:id', (req,res,next) ->
   res.send records[id]
   return next()
 
+server.get '/my-record/:parentId/my-record/:childId', (req,res,next) ->
+  res.send {id: "nested1", label: "this is a nested record"}
+
 server.put '/my-record/:id', (req,res,next) ->
   unless req.params.id? and (/^\d+$/.test req.params.id.trim())
     res.send 400, {error: "invalid id"}

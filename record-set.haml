@@ -126,7 +126,7 @@
   *
   * @element record-base
   */
-%polymer-element(name="record-base" attributes="rid persist type noautoload")
+%polymer-element(name="record-base" attributes="rid persist type noautoload parent")
   %template
     %record-set(id="set")
     %core-ajax(id="pull" handleAs="json" url="{{_resUrl}}" method="GET" on-core-response="{{_handlePull}}")
@@ -152,6 +152,7 @@
       # Set this attribute, to immediately persist the record in the local storage. Can be used to describe an initial database.
       #
       #     <my-record persist field="data" ...></my-record>
+      #
       # @attribute persist
       # @type boolean
       # @default false
@@ -173,6 +174,23 @@
       # @default false
       ### 
       noautoload: undefined
+
+      ###*
+      # You may nest REST resource. e.g.
+      # 
+      #     GET /forum/General+Discussion/thread/Arbitrary+Thread
+      #
+      # Use the parent attribute to represent this nested resources; like so:
+      #
+      #     <forum-record  id="forum"  rid="General Discussion" ...></forum-record>
+      #     <thread-record id="thread" rid="Arbitrary Thread"   parent="{{$.forum}}" ...></thread-record>
+      #
+      # @attribute parent
+      # @type object (record-base)
+      # @default undefined
+      ###
+      parent: undefined
+
       observe: {
         '$.set.all': '_doAutoLoad' # TODO: overkill ! use fine grained events
       }
@@ -185,9 +203,18 @@
         # @type array
         ###
         all: '$.set.all[type]'
-        _resUrl: "_urlConcat($.set.href, type)"
-        _resIdUrl: "_urlConcat($.set.href, type, rid)"
-      _urlConcat: (cs...) -> ((if c? then c.replace(/\/+$/, '') else '') for c in cs).join('/')
+        _resPath: "_pathConcat(parent ? parent._resPath : [], type, rid)"
+        _resUrl: "_urlConcat($.set.href, _resPath, false)"
+        _resIdUrl: "_urlConcat($.set.href, _resPath, true)"
+      _pathConcat: (parentPath, type, rid) -> 
+        r = parentPath.slice()
+        r.push type
+        r.push rid 
+        r
+      _urlConcat: (base, path, includeId) -> 
+        cleanBase = if base? then base.replace(/\/+$/, '') else ''
+        cleanBase + '/' + (if includeId then path else path.slice(0,-1)).join('/')
+
       ready: () ->
         @save() if @persist?
         @load() if @rid? and not @noautoload?

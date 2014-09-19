@@ -67,6 +67,10 @@
           %template(repeat="{{$.x.all}}")
             %my-record-view(rid="{{}}" noautoload)
 
+        %h3 nesting
+        %my-record#parent(rid="1")
+        %my-record#child(rid="nested1" parent="{{$.parent}}")
+        %p {{$.child.label}}
       :coffeescript
         Polymer 'demo-app',
           ready: () ->
@@ -77,6 +81,7 @@
               this.async () => 
                 @$.data.clear()
                 @$.x.pull()
+                @$.child.loadRemote()
 
             @$.noRest.addEventListener "click", (e) =>
               e.preventDefault()
@@ -109,6 +114,7 @@
                 @$.x.createRemote()
               else
                 @$.x.save()
-
+            
+            @$.child.loadRemote()
             console.log "ready"
     %demo-app
