@@ -87,7 +87,10 @@
         <h3>nesting</h3>
         <my-record id='parent' rid='1'></my-record>
         <my-record id='child' parent='{{$.parent}}' rid='nested1'></my-record>
-        <p>{{$.child.label}}</p>
+        <p hidden?='{{$.child.label == undefined}}'>{{$.child.label}} all: {{$.child.all}}</p>
+        <my-record id='parent2' rid='2'></my-record>
+        <my-record id='child2' parent='{{$.parent2}}' rid='nested2'></my-record>
+        <p hidden?='{{$.child2.label == undefined}}'>{{$.child2.label}} all: {{$.child2.all}}</p>
       </template>
       <script>
         (function() {
@@ -101,7 +104,8 @@
                   return _this.async(function() {
                     _this.$.data.clear();
                     _this.$.x.pull();
-                    return _this.$.child.loadRemote();
+                    _this.$.child.loadRemote();
+                    return _this.$.child2.loadRemote();
                   });
                 };
               })(this));

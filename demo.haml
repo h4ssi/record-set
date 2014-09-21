@@ -70,7 +70,10 @@
         %h3 nesting
         %my-record#parent(rid="1")
         %my-record#child(rid="nested1" parent="{{$.parent}}")
-        %p {{$.child.label}}
+        %p{"hidden?"=>'{{$.child.label == undefined}}'} {{$.child.label}} all: {{$.child.all}}
+        %my-record#parent2(rid="2")
+        %my-record#child2(rid="nested2" parent="{{$.parent2}}")
+        %p{"hidden?"=>'{{$.child2.label == undefined}}'} {{$.child2.label}} all: {{$.child2.all}}
       :coffeescript
         Polymer 'demo-app',
           ready: () ->
@@ -82,6 +85,7 @@
                 @$.data.clear()
                 @$.x.pull()
                 @$.child.loadRemote()
+                @$.child2.loadRemote()
 
             @$.noRest.addEventListener "click", (e) =>
               e.preventDefault()

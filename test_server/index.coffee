@@ -50,7 +50,7 @@ server.get '/my-record/:id', (req,res,next) ->
   return next()
 
 server.get '/my-record/:parentId/my-record/:childId', (req,res,next) ->
-  res.send {id: "nested1", label: "this is a nested record"}
+  res.send {id: req.params.childId, label: "this is a nested record"}
 
 server.put '/my-record/:id', (req,res,next) ->
   unless req.params.id? and (/^\d+$/.test req.params.id.trim())
