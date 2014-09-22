@@ -1,0 +1,13 @@
+!!! 5
+%haml
+  %body
+    %script(src="../bower_components/mocha/mocha.js")
+    %script(src="../bower_components/should/should.js")
+    :coffeescript
+      mocha.setup 'bdd'
+      describe 'MyFeature', ->
+        it 'can be tested', ->
+          true.should.equal true
+        xit 'can be skipped', ->
+          true.should.equal false
+      mochaPhantomJS.run()

@@ -6,6 +6,7 @@ module.exports = (grunt) ->
                 files:
                     'record-set.html': 'record-set.haml'
                     'demo.html': 'demo.haml'
+                    'tests/test.html': 'tests/test.haml'
                 options:
                     bundleExec: true
         copy:
@@ -17,7 +18,7 @@ module.exports = (grunt) ->
                 ]
         watch:
             dev:
-                files: ['*.haml']
+                files: ['**/*.haml']
                 tasks: ['haml','copy']
 
     grunt.loadNpmTasks 'grunt-contrib-haml'

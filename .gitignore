@@ -36,3 +36,7 @@ build/
 /vendor
 /bower_components
 /node_modules
+
+# tests must not be published via bower, so we do not need to include html files
+/test*/**/*.html
+/test*/**/*.js
