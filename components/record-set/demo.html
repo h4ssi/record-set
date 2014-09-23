@@ -84,6 +84,13 @@
             <my-record-view noautoload rid='{{}}'></my-record-view>
           </template>
         </ul>
+        <h3>nesting</h3>
+        <my-record id='parent' rid='1'></my-record>
+        <my-record id='child' parent='{{$.parent}}' rid='nested1'></my-record>
+        <p hidden?='{{$.child.label == undefined}}'>{{$.child.label}} all: {{$.child.all}}</p>
+        <my-record id='parent2' rid='2'></my-record>
+        <my-record id='child2' parent='{{$.parent2}}' rid='nested2'></my-record>
+        <p hidden?='{{$.child2.label == undefined}}'>{{$.child2.label}} all: {{$.child2.all}}</p>
       </template>
       <script>
         (function() {
@@ -96,7 +103,9 @@
                   _this.$.data.href = _this.$.rest.value;
                   return _this.async(function() {
                     _this.$.data.clear();
-                    return _this.$.x.pull();
+                    _this.$.x.pull();
+                    _this.$.child.loadRemote();
+                    return _this.$.child2.loadRemote();
                   });
                 };
               })(this));
@@ -140,6 +149,7 @@
                   }
                 };
               })(this));
+              this.$.child.loadRemote();
               return console.log("ready");
             }
           });

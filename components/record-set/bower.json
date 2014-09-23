@@ -1,6 +1,6 @@
 {
   "name": "record-set",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "homepage": "https://github.com/H4ssi/record-set",
   "authors": [
     "Florian Hassanen <florian.hassanen@gmail.com>"
@@ -28,5 +28,9 @@
   "dependencies": {
     "polymer": "Polymer/polymer#~0.4.0",
     "core-ajax": "Polymer/core-ajax#~0.4.0"
+  },
+  "devDependencies": {
+    "mocha": "~1.21.4",
+    "should": "~3.3.1"
   }
 }

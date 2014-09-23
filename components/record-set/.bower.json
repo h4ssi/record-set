@@ -28,14 +28,17 @@
     "polymer": "Polymer/polymer#~0.4.0",
     "core-ajax": "Polymer/core-ajax#~0.4.0"
   },
-  "_release": "8cebfd2997",
+  "devDependencies": {
+    "mocha": "~1.21.4",
+    "should": "~3.3.1"
+  },
+  "_release": "931241641c",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "8cebfd2997ea97fb8b6412c8587b2f16aa06df3b"
+    "commit": "931241641c44b43d81197f9fea99a49f6e9e5167"
   },
   "_source": "git://github.com/H4ssi/record-set.git",
   "_target": "master",
-  "_originalSource": "H4ssi/record-set",
-  "_direct": true
+  "_originalSource": "H4ssi/record-set"
 }
